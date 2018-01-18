@@ -166,6 +166,26 @@ function queryCriteriaToMongo(query, options) {
 	return hash
 }
 
+
+function criteriaOrFunction(criteria) {
+	if (criteria.or) {
+		let output = { $or: [] };
+		delete criteria.or;
+		let keys = Object.keys(criteria);
+		if (keys.length == 0) {
+			return {};
+		}
+		for (let key in criteria) {
+			const field = {};
+			field[key] = criteria[key];
+			output.$or.push(field);
+		}
+		return output;
+	}
+	return criteria;
+}
+
+
 // Convert query parameters to a mongo query options.
 // for example {fields:'a,b',offset:8,limit:16} becomes {fields:{a:true,b:true},skip:8,limit:16}
 function queryOptionsToMongo(query, options) {
@@ -209,16 +229,7 @@ module.exports = function (query, options) {
 	if (typeof query === 'string') query = options.parser.parse(query)
 
 	let criteria = queryCriteriaToMongo(query, options);
-	if (criteria.or) {
-		let output = { $or: [] };
-		delete criteria.or;
-		for (let key in criteria) {
-			const field = {};
-			field[key] = criteria[key];
-			output.$or.push(field);
-		}
-		criteria = output;
-	}
+	criteria = criteriaOrFunction(criteria);
 	return {
 		criteria,
 		options: queryOptionsToMongo(query, options),
