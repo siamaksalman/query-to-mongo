@@ -13,6 +13,12 @@ describe("query-to-mongo(query) =>", function () {
             assert.ok(results.criteria)
             assert.deepEqual(results.criteria, {"i": 10, "f": 1.2, "z": 0})
         })
+        it("should create $or criteria", function () {
+            var results = q2m("or=1&i=10&f=1.2&z=0");
+            // console.log(results);
+            assert.ok(results.criteria)
+            assert.deepEqual(results.criteria, {$or: [ {"i": 10}, {"f": 1.2}, {"z": 0}]})
+        })
         it("should create boolean criteria", function () {
             var results = q2m("t=true&f=false")
             assert.ok(results.criteria)
